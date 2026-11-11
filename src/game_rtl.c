@@ -35,6 +35,38 @@
 #include "game_rtl.h"
 
 #include "beam_frame_driver.h"
+#include "common_rtl.h"
+
+/* Save states carry the CPU's place too, not only memory.
+ *
+ * This game has a main loop per mode (the street, the two doors, each
+ * nightmare), and the guest blob alone says nothing about which one the CPU
+ * was in. A state loaded in a running session resumed in that session's
+ * loop: saved at the doors and loaded from the street, the street's loop ran
+ * over the doors' memory and the picture fell apart. The framework's
+ * execution chunk (CPU registers, the interpreter's resume point, beam and
+ * APU pacing, the same residue rewind uses) is appended after the guest
+ * blob; a state without it still loads as before. */
+static void TsbnStateSaveExtra(struct SaveLoadInfo *sli)
+{
+    RtlSaveExecutionState(sli);
+}
+
+static bool s_tsbn_state_has_execution;
+
+static void TsbnStateLoadExtra(struct SaveLoadInfo *sli, uint32_t version)
+{
+    (void)version;
+    s_tsbn_state_has_execution = RtlLoadExecutionState(sli);
+}
+
+static void TsbnStateLoaded(uint32_t version)
+{
+    (void)version;
+    if (s_tsbn_state_has_execution)
+        RtlApplyExecutionState();
+    s_tsbn_state_has_execution = false;
+}
 
 void GameRunOneFrame(void)
 {
@@ -62,4 +94,7 @@ const RtlGameInfo kGameInfo = {
     .draw_ppu_frame = &GameDrawPpuFrame,
     .save_name_prefix = "save",
     .session_reset = &GameSessionReset,
+    .state_save_extra = &TsbnStateSaveExtra,
+    .state_load_extra = &TsbnStateLoadExtra,
+    .on_state_loaded = &TsbnStateLoaded,
 };
