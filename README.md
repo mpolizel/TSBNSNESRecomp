@@ -3,6 +3,8 @@
 A native recompilation of **The Simpsons: Bart's Nightmare** (USA), built on
 [snesrecomp](https://github.com/RetroPortingToolKit/snesrecomp).
 
+<a href="https://recomplauncher.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://recomplauncher.com/assets/press/launcher/badge-light.svg"><img alt="Get it on RecompLauncher" src="https://recomplauncher.com/assets/press/launcher/badge-dark.svg" height="48"></picture></a>
+
 Bart's Nightmare is Sculptured Software's 1992 Simpsons game for the Super
 NES, published by Acclaim: Bart falls asleep over his homework, and the
 pages blow away into his dreams. He chases them down Springfield's streets
@@ -41,6 +43,11 @@ On first run:
    the file name does not matter, the contents are checked).
 4. Press **Generate & rebuild**. The playable game is built into `build/` and
    started; run it from there afterwards.
+
+[RecompLauncher](https://recomplauncher.com) can install it too: the release
+carries a `recomplauncher.json`, so the launcher asks for your ROM, opens this
+same setup with it already picked, and shows the window, picture and sound
+settings on the game's page.
 
 In the launcher, **Settings → Shader** lists the scanline, CRT and upscaler
 presets; choosing one switches the renderer to OpenGL automatically. A fresh
