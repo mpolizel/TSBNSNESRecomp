@@ -45,9 +45,10 @@ On first run:
    started; run it from there afterwards.
 
 [RecompLauncher](https://recomplauncher.com) can install it too: the release
-carries a `recomplauncher.json`, so the launcher asks for your ROM, opens this
-same setup with it already picked, and shows the window, picture and sound
-settings on the game's page.
+carries a `recomplauncher.json`, so the launcher asks for your ROM, builds the
+game on its own setup screen (no window of ours), and Play goes straight into
+the game. The window, renderer, shader, picture and sound settings are on the
+game's page, and Big Picture mode opens it full screen.
 
 In the launcher, **Settings → Shader** lists the scanline, CRT and upscaler
 presets; choosing one switches the renderer to OpenGL automatically. A fresh
@@ -121,10 +122,12 @@ git -C snesrecomp apply ../patches/snesrecomp-nmi-idle-loop-wai.patch
 git -C snesrecomp apply ../patches/snesrecomp-nmi-wai-in-handler.patch
 git -C snesrecomp apply ../patches/snesrecomp-raster-oam-and-hdma.patch
 git -C snesrecomp apply ../patches/snesrecomp-raster-vram-journal.patch
+git -C snesrecomp apply ../patches/snesrecomp-recomplauncher.patch
 git -C snesrecomp apply ../patches/snesrecomp-resume-state-restart.patch
 git -C snesrecomp apply ../patches/snesrecomp-shader-forces-opengl.patch
 git -C snesrecomp apply ../patches/snesrecomp-state-load-raster-reset.patch
 git -C snesrecomp apply ../patches/snesrecomp-timing-frame-pacing.patch
+git -C snesrecomp apply ../patches/snesrecomp-v10-savestates.patch
 git -C recomp-ui apply ../patches/recomp-ui-host-toggle.patch
 ```
 
@@ -212,6 +215,26 @@ path left the plain path's vertex attributes disabled.
 
 `snesrecomp-shader-forces-opengl.patch` switches the renderer to OpenGL when a
 shader is picked, since the presets only run there.
+
+`snesrecomp-v10-savestates.patch` keeps every save state players already
+have. The framework's current access-exact SPC/DSP timing writes v11 states
+and refused the v10 ones every earlier release wrote. With this patch a v10
+state loads again: the APU's timer/DSP advance debt and the SPC's access
+cursor start at zero (a v10 state always stands at an opcode boundary), the
+per-clock S-DSP is rebuilt from the old model's voices (BRR block, position
+and interpolation window, envelope, echo history), and a v7 execution chunk
+(this game's 0.1.1 saves keep the CPU's place) converts to v8. A save made at
+the doors or inside a nightmare in 0.1.1 resumes there, with the music
+playing on.
+
+`snesrecomp-recomplauncher.patch` follows RecompLauncher's recommendations:
+`--prepare` builds the game from the ROM with no window, printing progress
+lines (the launcher's setup step); started by RecompLauncher
+(`RECOMPLAUNCHER=1`) the setup opens the built game straight on the ROM
+instead of its own window, and in Big Picture mode
+(`RECOMPLAUNCHER_MODE=bigpicture`) full screen; controllers are no longer
+read while the window is in the background (`[General] BackgroundInput = 1`
+turns that back on). Without those arguments and variables nothing changes.
 
 `recomp-ui-host-toggle.patch` lets a title add one checkbox of its own beside
 "Skip launcher on boot"; this project uses it for the update check.
@@ -313,7 +336,10 @@ Single player.
 
 This project's own source is under the MIT license in `LICENSE`. The
 framework carries its own terms (PolyForm Noncommercial 1.0.0) — see
-`snesrecomp/LICENSE` and `snesrecomp/THIRD_PARTY_ATTRIBUTION.md`; the changes
+`snesrecomp/LICENSE` and `snesrecomp/THIRD_PARTY_ATTRIBUTION.md`, with the
+additional permission in `snesrecomp/PERMISSIONS.md`
+(<https://github.com/mstan/snesrecomp/blob/main/PERMISSIONS.md>) for voluntary
+donations such as the Buy Me a Coffee link above: the game stays free; the changes
 in `patches/` apply to that framework and fall under its terms. The shaders
 under `assets/shaders/_libretro/` come from libretro/glsl-shaders and keep each
 author's license in their file headers. None of these cover the game data,

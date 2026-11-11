@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.2 — 2026-11-11
+
+Current snesrecomp and recomp-ui, and RecompLauncher's recommendations. The
+framework brings its access-exact sound timing (a per-clock S-DSP), sprite
+priority, brightness-rounding, HDMA and mosaic fixes: the intro's fades now
+match the console where 0.1.1 was a level off. Save states from 0.1.1 keep
+loading, at the doors or inside a nightmare, with the music playing on (the
+old sound state is converted). With [RecompLauncher](https://recomplauncher.com)
+the game builds on the launcher's setup screen, Play goes straight into the
+game, Big Picture opens full screen, and the renderer and shader are on the
+game's page. Controllers are no longer read while the window is in the
+background ([General] BackgroundInput = 1 restores that); the log keeps the
+last runs.
+
 ## 0.1.1 — 2026-11-11
 
 RecompLauncher support: the release carries a `recomplauncher.json`, so
