@@ -1,0 +1,61 @@
+diff --git a/runner/src/apu_frame_clock.h b/runner/src/apu_frame_clock.h
+index f00c2334..4c32a541 100644
+--- a/runner/src/apu_frame_clock.h
++++ b/runner/src/apu_frame_clock.h
+@@ -26,8 +26,16 @@ static inline uint64_t rtl_apu_clock_now(const RtlApuFrameClock *clock,
+ static inline uint64_t rtl_apu_clock_finish(RtlApuFrameClock *clock,
+                                            uint64_t master) {
+   uint64_t end = rtl_apu_clock_now(clock, master);
+-  uint64_t minimum = clock->start_guest + RTL_APU_CYCLES_PER_FRAME;
+-  if (end < minimum) end = minimum;  /* WAI still advances a hardware frame. */
++  /* WAI still advances a hardware frame: an iteration whose CPU clock hardly
++   * moved counts as one. A shorter-than-a-frame iteration that did run is
++   * real, though: the beam-aligned driver ends every iteration at V=225, so
++   * one whose CPU half ran past it (1.22 frames) is followed by one that
++   * starts late and ends at the next boundary (0.78). Raising that one to a
++   * whole frame counted the overrun twice; the host waited 2% too long and
++   * Flashback's polygon intro fell a second behind the console every half
++   * minute. */
++  if (end < clock->start_guest + RTL_APU_CYCLES_PER_FRAME / 2)
++    end = clock->start_guest + RTL_APU_CYCLES_PER_FRAME;
+   clock->last_duration = end - clock->start_guest;
+   clock->next_guest = end;
+   /* Leave the current origin intact: raster IRQs can still touch APU ports
+diff --git a/runner/src/desktop/host_clock.c b/runner/src/desktop/host_clock.c
+index c2a9529f..77f2de36 100644
+--- a/runner/src/desktop/host_clock.c
++++ b/runner/src/desktop/host_clock.c
+@@ -24,7 +24,11 @@ void snes_host_clock_simulation_done(SnesHostClock *c, double now,
+   /* Keep ordinary sub-frame scheduling jitter on the original phase. A
+    * loader may preserve its backlog so its non-interactive frames refill the
+    * guest-driven audio queue; all ordinary gameplay drops stale work. */
+-  c->next_simulation = preserve_debt || now <= deadline
++  /* A frame that ends less than one period late keeps the original phase,
++   * so the next one starts at once and the lateness is made up; only a real
++   * stall (a period or more) drops its backlog. Dropping every small overrun
++   * lost it for good: the game ran slower than the console on average. */
++  c->next_simulation = preserve_debt || now <= deadline + 1.0 / c->simulation_hz
+       ? deadline : now + 1.0 / c->simulation_hz;
+   ++c->simulation_frames;
+ }
+diff --git a/runner/src/desktop/host_main.c b/runner/src/desktop/host_main.c
+index f0cd5dee..0afd8767 100644
+--- a/runner/src/desktop/host_main.c
++++ b/runner/src/desktop/host_main.c
+@@ -400,8 +400,14 @@ static void WaitUntil(double deadline) {
+   double now = MonotonicSeconds();
+   while (now < deadline) {
+     double remaining_ms = (deadline - now) * 1000;
+-    if (remaining_ms > 1.5)
+-      SDL_Delay((Uint32)(remaining_ms - 0.5));
++    /* SDL_Delay on Windows often sleeps 1-2 ms past what it was asked: sleep
++     * to about 2 ms before the deadline and yield-wait the rest. With the old
++     * 0.5 ms margin a sixth of the frames ended late, and the clock dropped
++     * that lateness (see snes_host_clock_simulation_done): Flashback's intro
++     * ran at 58.8 fps instead of 60.1 and fell a second behind the console
++     * every half minute. */
++    if (remaining_ms > 3.0)
++      SDL_Delay((Uint32)(remaining_ms - 2.0));
+     else
+       SDL_Delay(0);
+     now = MonotonicSeconds();
