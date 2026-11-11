@@ -12,7 +12,8 @@ the game builds on the launcher's setup screen, Play goes straight into the
 game, Big Picture opens full screen, and the renderer and shader are on the
 game's page. Controllers are no longer read while the window is in the
 background ([General] BackgroundInput = 1 restores that); the log keeps the
-last runs.
+last runs. The update check on start stays; when RecompLauncher starts the
+game it leaves updates to the launcher.
 
 ## 0.1.1 — 2026-11-11
 

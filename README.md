@@ -48,7 +48,9 @@ On first run:
 carries a `recomplauncher.json`, so the launcher asks for your ROM, builds the
 game on its own setup screen (no window of ours), and Play goes straight into
 the game. The window, renderer, shader, picture and sound settings are on the
-game's page, and Big Picture mode opens it full screen.
+game's page, and Big Picture mode opens it full screen. RecompLauncher keeps
+the game up to date itself, so the game's own update check steps aside when
+the launcher starts it; started any other way, it checks as before.
 
 In the launcher, **Settings → Shader** lists the scanline, CRT and upscaler
 presets; choosing one switches the renderer to OpenGL automatically. A fresh
