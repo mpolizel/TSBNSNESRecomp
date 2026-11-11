@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1 — 2026-11-11
+
+RecompLauncher support: the release carries a `recomplauncher.json`, so
+[RecompLauncher](https://recomplauncher.com) can install the game, ask for your
+ROM, open the setup with it already picked, and show the window, picture and
+sound settings on the game's page. Nothing changes in the game itself; saves
+and save states from 0.1.0 keep working.
+
 ## 0.1.0 — 2026-11-11
 
 First release: a setup pack that recompiles the game from your own ROM. Boots
