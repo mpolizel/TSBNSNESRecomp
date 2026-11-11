@@ -19,7 +19,7 @@ index 24746bb6..10778b20 100644
    int slices = 0;
    uint64_t frame_end;
 diff --git a/runner/src/desktop/host_main.c b/runner/src/desktop/host_main.c
-index 3f14db60..6552bb85 100644
+index 670938aa..b84652fe 100644
 --- a/runner/src/desktop/host_main.c
 +++ b/runner/src/desktop/host_main.c
 @@ -53,6 +53,50 @@
@@ -82,7 +82,7 @@ index 3f14db60..6552bb85 100644
        }
        if (same_rom && !g_relaunch.with_state) {
          /* Restarting now would throw the player's progress away. The edit is
-@@ -4109,7 +4153,7 @@ error_reading:;
+@@ -4127,7 +4171,7 @@ error_reading:;
     * setting a live session cannot take, and saved the moment it left. The
     * file is one-shot -- a later plain launch must not resume it again. */
    if (args.resume_state) {

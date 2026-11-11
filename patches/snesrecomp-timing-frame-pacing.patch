@@ -39,7 +39,7 @@ index c2a9529f..77f2de36 100644
    ++c->simulation_frames;
  }
 diff --git a/runner/src/desktop/host_main.c b/runner/src/desktop/host_main.c
-index e7a4891a..fe69a48c 100644
+index a3887428..5a7e9363 100644
 --- a/runner/src/desktop/host_main.c
 +++ b/runner/src/desktop/host_main.c
 @@ -410,8 +410,14 @@ static void WaitUntil(double deadline) {
