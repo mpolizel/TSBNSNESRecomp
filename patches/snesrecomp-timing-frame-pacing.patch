@@ -39,10 +39,10 @@ index c2a9529f..77f2de36 100644
    ++c->simulation_frames;
  }
 diff --git a/runner/src/desktop/host_main.c b/runner/src/desktop/host_main.c
-index f0cd5dee..0afd8767 100644
+index e7a4891a..fe69a48c 100644
 --- a/runner/src/desktop/host_main.c
 +++ b/runner/src/desktop/host_main.c
-@@ -400,8 +400,14 @@ static void WaitUntil(double deadline) {
+@@ -410,8 +410,14 @@ static void WaitUntil(double deadline) {
    double now = MonotonicSeconds();
    while (now < deadline) {
      double remaining_ms = (deadline - now) * 1000;

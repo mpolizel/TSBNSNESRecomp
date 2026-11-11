@@ -1,8 +1,8 @@
 diff --git a/runner/src/snes/ppu.c b/runner/src/snes/ppu.c
-index 80d52f52..c3cbd89a 100644
+index a6f21e8e..9f11d5d0 100644
 --- a/runner/src/snes/ppu.c
 +++ b/runner/src/snes/ppu.c
-@@ -1516,8 +1516,13 @@ static void PpuCaptureBackground_4bpp(Ppu *ppu, uint y, bool sub, uint layer) {
+@@ -1699,8 +1699,13 @@ static void PpuCaptureBackground_4bpp(Ppu *ppu, uint y, bool sub, uint layer) {
  
  /* Modes 2/4/6 use BG3's tilemap as per-column scroll overrides for the
   * displayed layers.  Mode 2 (the Star Fox attract/game perspective screens)
@@ -18,7 +18,7 @@ index 80d52f52..c3cbd89a 100644
   * The first visible tile column cannot be offset on hardware. */
  static void PpuDrawBackground_4bpp_opt(Ppu *ppu, uint y, bool sub, uint layer,
                                        PpuZbufType zhi, PpuZbufType zlo) {
-@@ -1552,7 +1557,7 @@ static void PpuDrawBackground_4bpp_opt(Ppu *ppu, uint y, bool sub, uint layer,
+@@ -1735,7 +1740,7 @@ static void PpuDrawBackground_4bpp_opt(Ppu *ppu, uint y, bool sub, uint layer,
    const unsigned hscroll = ppu->hScroll[layer];
    const unsigned vscroll = ppu->vScroll[layer];
    const unsigned opt_hscroll = ppu->hScroll[2];
@@ -27,7 +27,7 @@ index 80d52f52..c3cbd89a 100644
    const int opt_hrow = (opt_vscroll & opt_coord_mask) >> opt_shift;
    const int opt_vrow = ((opt_vscroll + 8) & opt_coord_mask) >> opt_shift;
    const uint16 enable = (uint16)(0x2000u << layer);
-@@ -1584,7 +1589,7 @@ static void PpuDrawBackground_4bpp_opt(Ppu *ppu, uint y, bool sub, uint layer,
+@@ -1768,7 +1773,7 @@ static void PpuDrawBackground_4bpp_opt(Ppu *ppu, uint y, bool sub, uint layer,
          if (hcell & enable)
            hoffset = (hcell & ~7) | (hscroll & 7);
          if (vcell & enable)
@@ -36,7 +36,7 @@ index 80d52f52..c3cbd89a 100644
        }
  
        const unsigned sx =
-@@ -3276,6 +3281,17 @@ typedef struct {
+@@ -3589,6 +3594,17 @@ typedef struct {
    uint16_t oam[0x100];
    uint8_t highOam[0x20];
  } PpuRasterOam;
@@ -54,7 +54,7 @@ index 80d52f52..c3cbd89a 100644
  typedef struct {
    uint8_t regs[PPU_SAVESTATE_REGS_SIZE];   /* inidisp..cgwsel at field start */
    uint8_t scrollPrev, scrollPrev2, m7prev;
-@@ -3289,6 +3305,11 @@ typedef struct {
+@@ -3602,6 +3618,11 @@ typedef struct {
    int oamOpen;                             /* last snapshot still filling */
    uint32_t oamDropped;
    PpuRasterOam oamSnap[PPU_RASTER_OAM_MAX];
@@ -66,7 +66,7 @@ index 80d52f52..c3cbd89a 100644
  } PpuRasterField;
  static PpuRasterField s_field[2];
  static int s_raster_cur;             /* recording; the other is completed */
-@@ -3304,7 +3325,42 @@ static struct {
+@@ -3617,7 +3638,42 @@ static struct {
  } s_raster_port;
  static int s_raster_oam_next;
  static uint16_t s_raster_live_oam[0x100];  /* the guest's OAM during a render */
@@ -109,7 +109,7 @@ index 80d52f52..c3cbd89a 100644
  
  /* Only the machine's PPU journals: the debug server and a few tools run
   * ppu_write on scratch copies. */
-@@ -3359,6 +3415,39 @@ static void raster_snapshot(PpuRasterField *f, const Ppu *ppu) {
+@@ -3672,6 +3728,39 @@ static void raster_snapshot(PpuRasterField *f, const Ppu *ppu) {
    f->oamCount = 0;
    f->oamOpen = 0;
    f->oamDropped = 0;
@@ -149,7 +149,7 @@ index 80d52f52..c3cbd89a 100644
  }
  
  /* The snapshot being filled holds whatever the guest has written since it
-@@ -3417,14 +3506,45 @@ void ppu_rasterFieldBoundary(void) {
+@@ -3730,14 +3819,45 @@ void ppu_rasterFieldBoundary(void) {
      return;
    s_raster_rendering = 0;
    raster_oam_close(&s_field[s_raster_cur], ppu);
@@ -195,7 +195,7 @@ index 80d52f52..c3cbd89a 100644
    s_raster_have_completed = 0;
    s_raster_rendering = 0;
    s_raster_render = NULL;
-@@ -3487,14 +3607,47 @@ void ppu_rasterRenderBegin(Ppu *ppu) {
+@@ -3800,14 +3920,47 @@ void ppu_rasterRenderBegin(Ppu *ppu) {
    memcpy(s_raster_live_oam, ppu->oam, sizeof(s_raster_live_oam));
    memcpy(s_raster_live_high_oam, ppu->highOam, sizeof(s_raster_live_high_oam));
    s_raster_oam_next = f->oamCount;
@@ -249,7 +249,7 @@ index 80d52f52..c3cbd89a 100644
    s_raster_render = f;
    s_raster_next = 0;
    s_raster_hdmaen_pending = 0;
-@@ -3532,12 +3685,22 @@ void ppu_rasterApplyLine(Ppu *ppu, int line) {
+@@ -3845,12 +3998,22 @@ void ppu_rasterApplyLine(Ppu *ppu, int line) {
      }
      s_raster_next++;
    }
@@ -272,7 +272,7 @@ index 80d52f52..c3cbd89a 100644
  }
  
  /* The render reconstructed the completed field. Writes the guest has made
-@@ -3560,8 +3723,16 @@ void ppu_rasterRenderEnd(Ppu *ppu) {
+@@ -3873,8 +4036,16 @@ void ppu_rasterRenderEnd(Ppu *ppu) {
    ppu->oamInHigh = s_raster_port.oamInHigh;
    ppu->oamSecondWrite = s_raster_port.oamSecondWrite;
    ppu->oamBuffer = s_raster_port.oamBuffer;
@@ -288,8 +288,8 @@ index 80d52f52..c3cbd89a 100644
 +  memcpy(ppu->cgram, s_raster_live_cgram, sizeof(s_raster_live_cgram));
  }
  
- /* Snapshot of the journal as the renderer will consume it, for the debug
-@@ -3737,6 +3908,9 @@ void ppu_write(Ppu* ppu, uint8_t adr, uint8_t val) {
+ typedef struct {
+@@ -4110,6 +4281,9 @@ void ppu_write(Ppu* ppu, uint8_t adr, uint8_t val) {
      case 0x18: {
        // TODO: vram access during rendering (also cgram and oam)
        uint16_t vramAdr = ppu_getVramRemap(ppu);
@@ -299,7 +299,7 @@ index 80d52f52..c3cbd89a 100644
        ppu->vram[vramAdr & 0x7fff] = (ppu->vram[vramAdr & 0x7fff] & 0xff00) | val;
        ppu->vramWriteCount++;
        // $2118 == low byte of word; byte_addr = word << 1.
-@@ -3753,6 +3927,9 @@ void ppu_write(Ppu* ppu, uint8_t adr, uint8_t val) {
+@@ -4126,6 +4300,9 @@ void ppu_write(Ppu* ppu, uint8_t adr, uint8_t val) {
      }
      case 0x19: {
        uint16_t vramAdr = ppu_getVramRemap(ppu);
@@ -309,7 +309,7 @@ index 80d52f52..c3cbd89a 100644
        ppu->vram[vramAdr & 0x7fff] = (ppu->vram[vramAdr & 0x7fff] & 0x00ff) | (val << 8);
        ppu->vramWriteCount++;
        // $2119 == high byte of word; byte_addr = (word << 1) + 1.
-@@ -3787,6 +3964,7 @@ void ppu_write(Ppu* ppu, uint8_t adr, uint8_t val) {
+@@ -4160,6 +4337,7 @@ void ppu_write(Ppu* ppu, uint8_t adr, uint8_t val) {
        ppu->cgramSecondWrite = false;
        break;
      case 0x22:
