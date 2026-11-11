@@ -1,0 +1,26 @@
+# ROM identity for The Simpsons - Barts Nightmare — the single source of truth.
+#
+# Read by three consumers, so a revision change is made once, here:
+#   - the build   (CMake generates snesrecomp_rom_identity.h from this file)
+#   - tools/regen.sh
+#   - .github/workflows/release.yml
+#
+# Format is `key = value`, one per line; `#` starts a comment. Values may be
+# quoted. Leaving a digest empty means the build cannot verify a ROM it is
+# handed — it will say so rather than accept it.
+
+display_name    = The Simpsons - Barts Nightmare
+rom_file        = Simpsons, The - Barts Nightmare (USA).sfc
+# Every digest of the bare image (copier header stripped), so the Retro
+# catalog can take a submission's identity from this file rather than ask
+# the submitter to hash the ROM again. The build verifies on crc32/sha256.
+expected_crc32  = ed1c03c2
+expected_md5    = 5f8c3fd37130d9b80f1d98d1b7034161
+expected_sha1   = 60021b603f6e778171a2dfae2a0fcbc3ea723c38
+expected_sha256 = f0d98e9061d0f6a193bb856de8a592f336dada97c41966e8d03119ba97465413
+rom_size        = 1048576
+mapping         = lorom
+region          = USA
+# What a mod package's [[target]] game_id must name to apply to this title
+# (snesrecomp/docs/MOD_PACKAGES.md). Stable across revisions on purpose.
+game_id         = thesimpsonsbartsnightmare-usa
